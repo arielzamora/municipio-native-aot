@@ -1,0 +1,47 @@
+# ==========================================
+# 1. Archivos Temporales y Compilados de .NET
+# ==========================================
+[Bb]in/
+[Oo]bj/
+*.suo
+*.user
+*.sln.docstates
+.vs/
+.idea/
+.vscode/
+*.userprefs
+*.dbmdl
+*.jfm
+appsettings.json
+!appsettings.Development.json
+!appsettings.json
+
+# ==========================================
+# 2. Node / Angular (Frontend)
+# ==========================================
+node_modules/
+dist/
+.angular/
+.npm/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# ==========================================
+# 3. Persistencia Local (DuckDB / SQL Local)
+# ==========================================
+*.db
+*.db.wal
+*.db.tmp
+duckdb_temp/
+*.sqlite
+*.sqlite3
+
+# ==========================================
+# 4. Sistema Operativo y Editores
+# ==========================================
+.DS_Store
+Thumbs.db
+desktop.ini
