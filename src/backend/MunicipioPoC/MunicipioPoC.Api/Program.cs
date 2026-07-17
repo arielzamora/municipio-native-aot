@@ -14,6 +14,11 @@ builder.AddServiceDefaults();
 // Add services to the container.
 builder.Services.AddOpenApi();
 
+builder.Services.ConfigureHttpJsonOptions(options =>
+{
+    options.SerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+});
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngular", policy =>
@@ -35,7 +40,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors("AllowAngular");
-app.UseHttpsRedirection();
+// Commented out HttpsRedirection to prevent SSL self-signed certificate warnings blocking the connection locally
+// app.UseHttpsRedirection();
 
 // In-memory or simulated database sync times (simulating historical data synchronization)
 var syncTracker = new Dictionary<string, (DateTime LastSync, TimeSpan Sla)>
