@@ -1,0 +1,80 @@
+name: CI/CD Pipeline - Municipio Native AOT
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  build-and-test:
+    name: Build and Test (CI)
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    # 1. Backend (.NET 9 / 10)
+    - name: Setup .NET SDK
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '10.0.x' # Aligns with the 10.0 version detected on host
+
+    - name: Restore Backend Dependencies
+      run: dotnet restore src/backend/MunicipioPoC/MunicipioPoC.sln
+
+    - name: Build Backend
+      run: dotnet build src/backend/MunicipioPoC/MunicipioPoC.sln --configuration Release --no-restore
+
+    # 2. Frontend (Angular 19)
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Install Frontend Dependencies
+      run: |
+        cd src/frontend
+        npm ci
+
+    - name: Build Frontend (Angular)
+      run: |
+        cd src/frontend
+        npm run build -- --configuration=production
+
+  deploy-infrastructure:
+    name: Deploy to Azure (CD)
+    needs: build-and-test
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    # Authentication via OIDC (Recommended Safe Option)
+    - name: Azure Login
+      uses: azure/login@v2
+      with:
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+    # Create Resource Group if not exists
+    - name: Create Resource Group
+      run: |
+        az group create --name rg-municipio-poc --location eastus
+
+    # Deploy Bicep template
+    - name: Deploy Azure Resources (Bicep)
+      uses: azure/arm-deploy@v2
+      with:
+        resourceGroupName: rg-municipio-poc
+        template: ./infra/main.bicep
+        parameters: >
+          sqlAdminPassword=${{ secrets.SQL_ADMIN_PASSWORD }}
