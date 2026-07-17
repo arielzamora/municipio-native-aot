@@ -29,12 +29,12 @@ El siguiente diagrama muestra la distribución física de la SPA en Angular, la 
 #### Patrón CQRS (Command Query Responsibility Segregation)
 Separación física del canal de consulta (Modo Fast leyendo de DuckDB local en disco) del canal de comando (la ingesta asíncrona en segundo plano desde las fuentes legadas):
 
-![Patrón CQRS](./docs/diagrams/CQRS pattern.png)
+![Patrón CQRS](./docs/diagrams/CQRS%20pattern.png)
 
 #### Patrón Backpressure (Control de Flujo Reactivo)
 Mecanismo de control que evita que la ingesta a alta velocidad sature los 4GB de RAM de la máquina local. El productor se detiene temporalmente cuando el canal en memoria llega a su límite, esperando a que la persistencia en DuckDB termine de escribir:
 
-![Patrón Backpressure](./docs/diagrams/Backpressure pattern.png)
+![Patrón Backpressure](./docs/diagrams/Backpressure%20pattern.png)
 
 ---
 
