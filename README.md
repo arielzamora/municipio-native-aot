@@ -4,7 +4,7 @@ Esta Prueba de Concepto (PoC) presenta una arquitectura de referencia moderna pa
 
 ---
 
-## 🎯 Resumen Ejecutivo (Para Gerentes y Líderes de Negocio)
+## 🎯 Resumen Ejecutivo
 
 El proyecto resuelve el desafío de integrar y normalizar información proveniente de **4 fuentes legadas heterogéneas** (bases de datos relacionales, documentales y almacenamiento de archivos) bajo estrictas restricciones operativas:
 
@@ -12,6 +12,29 @@ El proyecto resuelve el desafío de integrar y normalizar información provenien
 2.  **Modo Fast (SLA de Lectura < 200ms)**: El panel de control debe responder de forma instantánea a las consultas analíticas consumiendo datos de una proyección inmutable en disco local, evitando consultas remotas costosas.
 3.  **Modo Fresh (Consulta en Tiempo Real)**: Permite consultar en vivo a los orígenes externos con un límite de tiempo de hasta 5 segundos, protegiendo al usuario con mecanismos de **resiliencia (Circuit Breaker)** si alguna de las bases de datos externas experimenta caídas.
 4.  **Auditoría de Pagos Inmutable**: Mantiene la consistencia de eventos financieros (500 transacciones por segundo estimadas para el mes 12) a través del patrón transaccional **Outbox**, delegando el cumplimiento de PCI-DSS a pasarelas externas.
+
+---
+
+## 🗺️ Diagramas de la Solución (.NET & Azure Nativo)
+
+### 1. Arquitectura de Contenedores (C4 Nivel 2)
+El siguiente diagrama muestra la distribución física de la SPA en Angular, la API en .NET 9, el Worker de Ingestión y los servicios en la nube de Azure (SQL Database y Service Bus):
+
+![Arquitectura de Contenedores](./docs/diagrams/Level2-Containers-Stack.NET-Azure-Native.png)
+
+---
+
+### 2. Implementación de Patrones Técnicos
+
+#### Patrón CQRS (Command Query Responsibility Segregation)
+Separación física del canal de consulta (Modo Fast leyendo de DuckDB local en disco) del canal de comando (la ingesta asíncrona en segundo plano desde las fuentes legadas):
+
+![Patrón CQRS](./docs/diagrams/CQRS pattern.png)
+
+#### Patrón Backpressure (Control de Flujo Reactivo)
+Mecanismo de control que evita que la ingesta a alta velocidad sature los 4GB de RAM de la máquina local. El productor se detiene temporalmente cuando el canal en memoria llega a su límite, esperando a que la persistencia en DuckDB termine de escribir:
+
+![Patrón Backpressure](./docs/diagrams/Backpressure pattern.png)
 
 ---
 
@@ -25,7 +48,7 @@ Durante la fase de diseño inicial (detallada en los documentos ADR), se analiza
 
 ---
 
-## 🗺️ Estructura del Monorepo
+## 📂 Estructura del Monorepo
 
 ```text
 /
